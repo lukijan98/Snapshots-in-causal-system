@@ -20,21 +20,11 @@ public class LYTellMessage extends BasicMessage {
 		this.lySnapshotResult = lySnapshotResult;
 	}
 	
-	private LYTellMessage(MessageType messageType, ServentInfo sender, ServentInfo receiver, 
-			boolean white, List<ServentInfo> routeList, String messageText, int messageId,
-			LYSnapshotResult lySnapshotResult) {
-		super(messageType, sender, receiver, white, routeList, messageText, messageId);
-		this.lySnapshotResult = lySnapshotResult;
-	}
+
 
 	public LYSnapshotResult getLYSnapshotResult() {
 		return lySnapshotResult;
 	}
 	
-	@Override
-	public Message setRedColor() {
-		Message toReturn = new LYTellMessage(getMessageType(), getOriginalSenderInfo(), getReceiverInfo(),
-				false, getRoute(), getMessageText(), getMessageId(), getLYSnapshotResult());
-		return toReturn;
-	}
+
 }

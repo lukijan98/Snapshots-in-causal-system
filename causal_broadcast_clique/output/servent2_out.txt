@@ -1,0 +1,32 @@
+13:16:22 - Starting servent [2|localhost|1300]
+13:16:22 - My info: [2|localhost|1300]
+13:16:22 - Neighbors:
+13:16:22 - 0 3 
+13:16:22 - Pausing for 3000 ms
+13:16:24 - Got message [0|0|a|CAUSAL_BROADCAST|2]
+13:16:24 - Committing [0|0|a|CAUSAL_BROADCAST|2]
+13:16:24 - Rebroadcasting... 1
+13:16:25 - Sending message [0|0|a|CAUSAL_BROADCAST|0]
+13:16:25 - Committing [2|1|c|CAUSAL_BROADCAST|2]
+13:16:25 - Pausing for 9000 ms
+13:16:25 - Sending message [0|0|a|CAUSAL_BROADCAST|3]
+13:16:26 - Got message [0|0|a|CAUSAL_BROADCAST|2]
+13:16:26 - Already had this. No rebroadcast.
+13:16:26 - Sending message [2|0|c|CAUSAL_BROADCAST|3]
+13:16:26 - Sending message [2|0|c|CAUSAL_BROADCAST|0]
+13:16:27 - Got message [2|0|c|CAUSAL_BROADCAST|2]
+13:16:27 - Got own message back. No rebroadcast.
+13:16:27 - Got message [2|0|c|CAUSAL_BROADCAST|2]
+13:16:27 - Got own message back. No rebroadcast.
+13:16:32 - Got message [1|0|b|CAUSAL_BROADCAST|2]
+13:16:32 - Committing [1|0|b|CAUSAL_BROADCAST|2]
+13:16:32 - Rebroadcasting... 2
+13:16:32 - Got message [1|0|b|CAUSAL_BROADCAST|2]
+13:16:32 - Already had this. No rebroadcast.
+13:16:33 - Sending message [1|0|b|CAUSAL_BROADCAST|0]
+13:16:33 - Sending message [1|0|b|CAUSAL_BROADCAST|3]
+13:16:34 - Current causal messages:
+13:16:34 - Message 0: a from 0
+13:16:34 - Message 1: c from 2
+13:16:34 - Message 2: b from 1
+13:16:34 - Stopping...

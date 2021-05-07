@@ -15,7 +15,7 @@ public interface SnapshotCollector extends Runnable, Cancellable {
 	void addNaiveSnapshotInfo(String snapshotSubject, int amount);
 	void addCLSnapshotInfo(int id, CLSnapshotResult clSnapshotResult);
 	void addLYSnapshotInfo(int id, LYSnapshotResult lySnapshotResult);
-
+	void addABSnapshotInfo(int id, ABSnapshotResult abSnapshotResult);
 	void startCollecting();
 
 }

@@ -27,6 +27,7 @@ public class SnapshotCollectorWorker implements SnapshotCollector {
 	private Map<String, Integer> collectedNaiveValues = new ConcurrentHashMap<>();
 	private Map<Integer, CLSnapshotResult> collectedCLValues = new ConcurrentHashMap<>();
 	private Map<Integer, LYSnapshotResult> collectedLYValues = new ConcurrentHashMap<>();
+	private Map<Integer, ABSnapshotResult> collectedABValues = new ConcurrentHashMap<>();
 	
 	private SnapshotType snapshotType = SnapshotType.NAIVE;
 	
@@ -44,6 +45,9 @@ public class SnapshotCollectorWorker implements SnapshotCollector {
 			break;
 		case LAI_YANG:
 			bitcakeManager = new LaiYangBitcakeManager();
+			break;
+		case ACHARYA_BADRINATH:
+			bitcakeManager = new AcharyaBadrinathBitcakeManager();
 			break;
 		case NONE:
 			AppConfig.timestampedErrorPrint("Making snapshot collector without specifying type. Exiting...");
@@ -236,7 +240,12 @@ public class SnapshotCollectorWorker implements SnapshotCollector {
 	public void addLYSnapshotInfo(int id, LYSnapshotResult lySnapshotResult) {
 		collectedLYValues.put(id, lySnapshotResult);
 	}
-	
+
+	@Override
+	public void addABSnapshotInfo(int id, ABSnapshotResult abSnapshotResult) {
+		collectedABValues.put(id, abSnapshotResult);
+	}
+
 	@Override
 	public void startCollecting() {
 		boolean oldValue = this.collecting.getAndSet(true);
