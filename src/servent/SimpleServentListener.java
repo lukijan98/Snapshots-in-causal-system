@@ -41,7 +41,7 @@ public class SimpleServentListener implements Runnable, Cancellable {
 	 */
 	private final ExecutorService threadPool = Executors.newWorkStealingPool();
 	
-	private List<Message> redMessages = new ArrayList<>();
+
 	
 	@Override
 	public void run() {
@@ -81,10 +81,9 @@ public class SimpleServentListener implements Runnable, Cancellable {
 					case PONG:
 						messageHandler = new PongHandler(clientMessage);
 						break;
-					case CAUSAL_BROADCAST:
-						messageHandler = new CausalBroadcastHandler(clientMessage, !AppConfig.IS_CLIQUE);
+					default:
+						messageHandler = new CausalMessageHandler(clientMessage,!AppConfig.IS_CLIQUE,snapshotCollector);
 						break;
-
 				}
 
 				threadPool.submit(messageHandler);

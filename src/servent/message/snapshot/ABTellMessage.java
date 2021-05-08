@@ -6,7 +6,6 @@ import app.ServentInfo;
 import app.snapshot_bitcake.ABSnapshotResult;
 import servent.message.BasicMessage;
 
-import servent.message.CausalBroadcastMessage;
 import servent.message.Message;
 import servent.message.MessageType;
 
@@ -17,21 +16,19 @@ import java.util.Map;
 
 public class ABTellMessage extends BasicMessage {
 
+    private static final long serialVersionUID = 1536279421038991652L;
     private ABSnapshotResult abSnapshotResult;
-    private Map<Integer, Integer> senderVectorClock;
     private int initiatorID;
 
-    public ABTellMessage(ServentInfo sender, ServentInfo receiver, ABSnapshotResult abSnapshotResult, Map<Integer, Integer> senderVectorClock, int initiatorID) {
+    public ABTellMessage(ServentInfo sender, ServentInfo receiver, ABSnapshotResult abSnapshotResult,  int initiatorID) {
         super(MessageType.AB_TELL, sender, receiver);
         this.abSnapshotResult = abSnapshotResult;
-        this.senderVectorClock = senderVectorClock;
         this.initiatorID = initiatorID;
     }
 
     private ABTellMessage(ServentInfo originalSenderInfo, ServentInfo receiverInfo,
                                    List<ServentInfo> routeList,String messageText, int messageId, ABSnapshotResult abSnapshotResult,Map<Integer, Integer> senderVectorClock, int initiatorID) {
-        super(MessageType.AB_TELL,originalSenderInfo,receiverInfo,routeList, messageText,messageId);
-        this.senderVectorClock = senderVectorClock;
+        super(MessageType.AB_TELL,originalSenderInfo,receiverInfo,routeList, messageText,messageId,senderVectorClock);
         this.abSnapshotResult = abSnapshotResult;
         this.initiatorID = initiatorID;
     }
@@ -43,7 +40,7 @@ public class ABTellMessage extends BasicMessage {
             ServentInfo newReceiverInfo = AppConfig.getInfoById(newReceiverId);
 
             Message toReturn = new ABTellMessage(getOriginalSenderInfo(),
-                    newReceiverInfo, getRoute(), getMessageText(), getMessageId(),abSnapshotResult,senderVectorClock,initiatorID);
+                    newReceiverInfo, getRoute(), getMessageText(), getMessageId(),abSnapshotResult,getSenderVectorClock(),initiatorID);
 
             return toReturn;
         } else {
@@ -61,7 +58,7 @@ public class ABTellMessage extends BasicMessage {
         List<ServentInfo> newRouteList = new ArrayList<>(getRoute());
         newRouteList.add(newRouteItem);
         Message toReturn = new ABTellMessage(getOriginalSenderInfo(),
-                getReceiverInfo(), newRouteList, getMessageText(), getMessageId(),abSnapshotResult,senderVectorClock,initiatorID);
+                getReceiverInfo(), newRouteList, getMessageText(), getMessageId(),abSnapshotResult,getSenderVectorClock(),initiatorID);
 
         return toReturn;
     }
@@ -71,10 +68,6 @@ public class ABTellMessage extends BasicMessage {
 
     public ABSnapshotResult getABSnapshotResult() {
         return abSnapshotResult;
-    }
-
-    public Map<Integer, Integer> getSenderVectorClock() {
-        return senderVectorClock;
     }
 
     public int getInitiatorID() {

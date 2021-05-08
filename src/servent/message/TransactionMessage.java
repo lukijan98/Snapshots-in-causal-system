@@ -3,6 +3,7 @@ package servent.message;
 import app.AppConfig;
 import app.ServentInfo;
 import app.snapshot_bitcake.ABSnapshotResult;
+import app.snapshot_bitcake.AcharyaBadrinathBitcakeManager;
 import app.snapshot_bitcake.BitcakeManager;
 import app.snapshot_bitcake.LaiYangBitcakeManager;
 import servent.message.snapshot.ABTellMessage;
@@ -22,21 +23,20 @@ public class TransactionMessage extends BasicMessage {
 	private static final long serialVersionUID = -333251402058492901L;
 
 	private transient BitcakeManager bitcakeManager;
-	private Map<Integer, Integer> senderVectorClock;
 	private int intendedReciver;
 	
-	public TransactionMessage(ServentInfo sender, ServentInfo receiver, int amount, BitcakeManager bitcakeManager,  Map<Integer, Integer> senderVectorClock, int intendedReciver) {
+	public TransactionMessage(ServentInfo sender, ServentInfo receiver, int amount, BitcakeManager bitcakeManager) {
 		super(MessageType.TRANSACTION, sender, receiver, String.valueOf(amount));
 		this.bitcakeManager = bitcakeManager;
-		this.senderVectorClock = senderVectorClock;
-		this.intendedReciver = intendedReciver;
+		this.intendedReciver = receiver.getId();
 	}
 
 	private TransactionMessage(ServentInfo originalSenderInfo, ServentInfo receiverInfo,
-						  List<ServentInfo> routeList, String messageText, int messageId,  Map<Integer, Integer> senderVectorClock, int intendedReciver) {
-		super(MessageType.AB_TELL,originalSenderInfo,receiverInfo,routeList, messageText,messageId);
-		this.senderVectorClock = senderVectorClock;
+						  List<ServentInfo> routeList, String messageText, int messageId,  Map<Integer, Integer> senderVectorClock,BitcakeManager bitcakeManager, int intendedReciver) {
+		super(MessageType.TRANSACTION,originalSenderInfo,receiverInfo,routeList, messageText,messageId,senderVectorClock);
 		this.intendedReciver = intendedReciver;
+		this.bitcakeManager = bitcakeManager;
+
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class TransactionMessage extends BasicMessage {
 			ServentInfo newReceiverInfo = AppConfig.getInfoById(newReceiverId);
 
 			Message toReturn = new TransactionMessage(getOriginalSenderInfo(),
-					newReceiverInfo, getRoute(), getMessageText(), getMessageId(),senderVectorClock,intendedReciver);
+					newReceiverInfo, getRoute(), getMessageText(), getMessageId(),getSenderVectorClock(),bitcakeManager,intendedReciver);
 
 			return toReturn;
 		} else {
@@ -63,7 +63,7 @@ public class TransactionMessage extends BasicMessage {
 		List<ServentInfo> newRouteList = new ArrayList<>(getRoute());
 		newRouteList.add(newRouteItem);
 		Message toReturn = new TransactionMessage(getOriginalSenderInfo(),
-				getReceiverInfo(), newRouteList, getMessageText(), getMessageId(),senderVectorClock,intendedReciver);
+				getReceiverInfo(), newRouteList, getMessageText(), getMessageId(),getSenderVectorClock(),bitcakeManager,intendedReciver);
 
 		return toReturn;
 	}
@@ -76,8 +76,23 @@ public class TransactionMessage extends BasicMessage {
 	@Override
 	public void sendEffect() {
 		int amount = Integer.parseInt(getMessageText());
-		
-		bitcakeManager.takeSomeBitcakes(amount);
+		if(bitcakeManager==null)
+			AppConfig.timestampedStandardPrint("AUUUUUUUUUUUU");
+		//AppConfig.timestampedStandardPrint("Prenos: "+ amount);
+		try{
+		bitcakeManager.takeSomeBitcakes(amount);}
+		catch (Exception e){
+			e.printStackTrace();
+		}
+		if (bitcakeManager instanceof AcharyaBadrinathBitcakeManager) {
+			AcharyaBadrinathBitcakeManager abFinancialManager = (AcharyaBadrinathBitcakeManager) bitcakeManager;
 
+			abFinancialManager.recordGiveTransaction(getReceiverInfo().getId(), amount);
+		}
+
+	}
+
+	public int getIntendedReciver() {
+		return intendedReciver;
 	}
 }

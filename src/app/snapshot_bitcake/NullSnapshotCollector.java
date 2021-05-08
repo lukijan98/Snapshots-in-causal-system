@@ -29,6 +29,9 @@ public class NullSnapshotCollector implements SnapshotCollector {
 	public void addLYSnapshotInfo(int id, LYSnapshotResult lySnapshotResult) {}
 
 	@Override
+	public void addABSnapshotInfo(int id, ABSnapshotResult abSnapshotResult) {}
+
+	@Override
 	public void startCollecting() {}
 
 }

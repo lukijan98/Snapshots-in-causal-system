@@ -1,4 +1,0 @@
-info
-pause 16000
-print_causal
-stop

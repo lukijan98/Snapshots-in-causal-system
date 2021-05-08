@@ -4,14 +4,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 import java.util.function.BiFunction;
 
-import servent.message.CausalBroadcastMessage;
+import app.snapshot_bitcake.SnapshotCollector;
+import servent.handler.TransactionHandler;
+import servent.handler.snapshot.ABTellHandler;
+import servent.handler.snapshot.TokenHandler;
 import servent.message.Message;
-import servent.message.MessageType;
+import servent.message.TransactionMessage;
 import servent.message.snapshot.ABTellMessage;
 
 /**
@@ -31,7 +32,9 @@ public class CausalBroadcastShared {
     private static Map<Integer, Integer> vectorClock = new ConcurrentHashMap<>();
     private static List<Message> commitedCausalMessageList = new CopyOnWriteArrayList<>();
     private static Queue<Message> pendingMessages = new ConcurrentLinkedQueue<>();
-    private static Object pendingMessagesLock = new Object();
+    public static Object pendingMessagesLock = new Object();
+    private static Object sendingMessageLock = new Object();
+    private static ExecutorService commitedMessagesPoll = Executors.newCachedThreadPool();
 
     public static void initializeVectorClock(int serventCount) {
         for(int i = 0; i < serventCount; i++) {
@@ -63,13 +66,6 @@ public class CausalBroadcastShared {
         pendingMessages.add(msg);
     }
 
-    public static void commitCausalMessage(Message newMessage) {
-        AppConfig.timestampedStandardPrint("Committing " + newMessage);
-        commitedCausalMessageList.add(newMessage);
-        incrementClock(newMessage.getOriginalSenderInfo().getId());
-
-        checkPendingMessages();
-    }
 
     private static boolean otherClockGreater(Map<Integer, Integer> clock1, Map<Integer, Integer> clock2) {
         if (clock1.size() != clock2.size()) {
@@ -85,7 +81,13 @@ public class CausalBroadcastShared {
         return false;
     }
 
-    public static void checkPendingMessages() {
+    public static boolean removeCommitedMessage(Message message){
+        if(commitedCausalMessageList.remove(message))
+            return true;
+        return false;
+    }
+
+    public static void checkPendingMessages(SnapshotCollector snapshotCollector) {
         boolean gotWork = true;
 
         while (gotWork) {
@@ -97,40 +99,35 @@ public class CausalBroadcastShared {
                 Map<Integer, Integer> myVectorClock = getVectorClock();
                 while (iterator.hasNext()) {
                     Message pendingMessage = iterator.next();
-                    if(pendingMessage.getMessageType().equals(MessageType.AB_TELL)){
-                        ABTellMessage abTellMessage = (ABTellMessage) pendingMessage;
-                        if (!otherClockGreater(myVectorClock, abTellMessage.getSenderVectorClock())) {
-                            gotWork = true;
-
-                            if(abTellMessage.getInitiatorID()==AppConfig.myServentInfo.getId()){
-                                AppConfig.timestampedStandardPrint("Committing " + pendingMessage);
-                                commitedCausalMessageList.add(pendingMessage);
-                            }
-
-                            incrementClock(pendingMessage.getOriginalSenderInfo().getId());
-
-                            iterator.remove();
-
-                            break;
+                    if (!otherClockGreater(myVectorClock, pendingMessage.getSenderVectorClock())) {
+                        gotWork = true;
+                        switch (pendingMessage.getMessageType()) {
+                            case TOKEN:
+                                incrementClock(pendingMessage.getOriginalSenderInfo().getId());
+                                commitedMessagesPoll.submit(new TokenHandler(pendingMessage,snapshotCollector.getBitcakeManager()));
+                                break;
+                            case AB_TELL:
+                                if(((ABTellMessage)pendingMessage).getInitiatorID()==AppConfig.myServentInfo.getId())
+                                    commitedMessagesPoll.submit(new ABTellHandler(pendingMessage,snapshotCollector));
+                                incrementClock(pendingMessage.getOriginalSenderInfo().getId());
+                            case TRANSACTION:
+                                if(((TransactionMessage)pendingMessage).getIntendedReciver()==AppConfig.myServentInfo.getId())
+                                    commitedMessagesPoll.submit(new TransactionHandler(pendingMessage,snapshotCollector.getBitcakeManager()));
+                                incrementClock(pendingMessage.getOriginalSenderInfo().getId());
                         }
-                    }else
-                    {
-                        CausalBroadcastMessage causalPendingMessage = (CausalBroadcastMessage) pendingMessage;
-                        if (!otherClockGreater(myVectorClock, causalPendingMessage.getSenderVectorClock())) {
-                            gotWork = true;
 
-                            AppConfig.timestampedStandardPrint("Committing " + pendingMessage);
-                            commitedCausalMessageList.add(pendingMessage);
-                            incrementClock(pendingMessage.getOriginalSenderInfo().getId());
 
-                            iterator.remove();
+                        //AppConfig.timestampedStandardPrint("Committing " + pendingMessage);
+                        commitedCausalMessageList.add(pendingMessage);
 
-                            break;
-                        }
+                        iterator.remove();
+
+                        break;
                     }
                 }
             }
         }
 
     }
+    public static void shutdown(){commitedMessagesPoll.shutdown();}
 }

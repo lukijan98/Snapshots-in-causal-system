@@ -108,7 +108,7 @@ public class MultipleServentStarter {
 //		startServentTest("naive_snapshot");
 //		startServentTest("cl_snapshot");
 		//startServentTest("ly_snapshot");
-		startServentTest("causal_broadcast_clique");
+		startServentTest("ab_snapshot");
 		
 	}
 

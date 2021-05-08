@@ -7,7 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import app.AppConfig;
+import app.CausalBroadcastShared;
 import servent.message.Message;
+import servent.message.MessageType;
+import servent.message.snapshot.ABTellMessage;
 import servent.message.snapshot.NaiveAskAmountMessage;
 import servent.message.util.MessageUtil;
 
@@ -99,6 +102,9 @@ public class SnapshotCollectorWorker implements SnapshotCollector {
 				}
 				collectedNaiveValues.put("node"+AppConfig.myServentInfo.getId(), bitcakeManager.getCurrentBitcakeAmount());
 				break;
+			case ACHARYA_BADRINATH:
+				((AcharyaBadrinathBitcakeManager)bitcakeManager).sendToken(this);
+				break;
 			case CHANDY_LAMPORT:
 				((ChandyLamportBitcakeManager)bitcakeManager).markerEvent(AppConfig.myServentInfo.getId());
 				break;
@@ -116,6 +122,11 @@ public class SnapshotCollectorWorker implements SnapshotCollector {
 				switch (snapshotType) {
 				case NAIVE:
 					if (collectedNaiveValues.size() == AppConfig.getServentCount()) {
+						waiting = false;
+					}
+					break;
+					case ACHARYA_BADRINATH:
+					if (collectedABValues.size() == AppConfig.getServentCount()) {
 						waiting = false;
 					}
 					break;
@@ -216,6 +227,37 @@ public class SnapshotCollectorWorker implements SnapshotCollector {
 				AppConfig.timestampedStandardPrint("System bitcake count: " + sum);
 				
 				collectedLYValues.clear(); //reset for next invocation
+				break;
+			case ACHARYA_BADRINATH:
+				sum = 0;
+				for (Entry<Integer, ABSnapshotResult> nodeResult : collectedABValues.entrySet()) {
+					sum += nodeResult.getValue().getRecordedAmount();
+					AppConfig.timestampedStandardPrint(
+							"Recorded bitcake amount for " + nodeResult.getKey() + " = " + nodeResult.getValue().getRecordedAmount());
+				}
+				for(int i = 0; i < AppConfig.getServentCount(); i++) {
+					for (int j = 0; j < AppConfig.getServentCount(); j++) {
+						if (i != j) {
+							if (AppConfig.getInfoById(i).getNeighbors().contains(j) &&
+									AppConfig.getInfoById(j).getNeighbors().contains(i)) {
+								int ijAmount = collectedABValues.get(i).getGiveHistory().get(j);
+								int jiAmount = collectedABValues.get(j).getGetHistory().get(i);
+
+								if (ijAmount != jiAmount) {
+									String outputString = String.format(
+											"Unreceived bitcake amount: %d from servent %d to servent %d",
+											ijAmount - jiAmount, i, j);
+									AppConfig.timestampedStandardPrint(outputString);
+									sum += ijAmount - jiAmount;
+								}
+							}
+						}
+					}
+				}
+
+				AppConfig.timestampedStandardPrint("System bitcake count: " + sum);
+
+				collectedABValues.clear(); //reset for next invocation
 				break;
 			case NONE:
 				//Shouldn't be able to come here. See constructor. 

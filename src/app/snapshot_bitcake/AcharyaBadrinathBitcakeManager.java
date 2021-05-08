@@ -1,6 +1,12 @@
 package app.snapshot_bitcake;
 
 import app.AppConfig;
+import app.CausalBroadcastShared;
+import servent.message.Message;
+import servent.message.MessageType;
+import servent.message.snapshot.ABTellMessage;
+import servent.message.snapshot.TokenMessage;
+import servent.message.util.MessageUtil;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +37,49 @@ public class AcharyaBadrinathBitcakeManager implements BitcakeManager {
             giveHistory.put(neighbor, 0);
             getHistory.put(neighbor, 0);
         }
+    }
+
+    public void sendTell(int tokenSenderId) {
+
+        int myId = AppConfig.myServentInfo.getId();
+        ABSnapshotResult snapshotResult = new ABSnapshotResult(myId, getCurrentBitcakeAmount(), giveHistory, getHistory);
+        Message tellMessage = new ABTellMessage(AppConfig.myServentInfo,null,snapshotResult,tokenSenderId);
+        for (Integer neighbor : AppConfig.myServentInfo.getNeighbors()) {
+            tellMessage = tellMessage.changeReceiver(neighbor);
+            MessageUtil.sendMessage(tellMessage);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    public void sendToken(SnapshotCollector snapshotCollector) {
+
+        int myId = AppConfig.myServentInfo.getId();
+        ABSnapshotResult snapshotResult = new ABSnapshotResult(
+                myId, getCurrentBitcakeAmount(), giveHistory, getHistory);
+
+        Message tokenMessage = new TokenMessage(
+                AppConfig.myServentInfo, null);
+
+
+        for (Integer neighbor : AppConfig.myServentInfo.getNeighbors()) {
+            tokenMessage = tokenMessage.changeReceiver(neighbor);
+            MessageUtil.sendMessage(tokenMessage);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Message toMe = new ABTellMessage(AppConfig.myServentInfo,AppConfig.myServentInfo,snapshotResult,myId);
+        CausalBroadcastShared.addPendingMessage(toMe);
+        CausalBroadcastShared.checkPendingMessages(snapshotCollector);
+
     }
 
     private class MapValueUpdater implements BiFunction<Integer, Integer, Integer> {

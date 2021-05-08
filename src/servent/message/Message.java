@@ -2,6 +2,7 @@ package servent.message;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import app.ServentInfo;
 
@@ -87,5 +88,7 @@ public interface Message extends Serializable {
 	 * we are sending the message.
 	 */
 	void sendEffect();
+
+	Map<Integer, Integer> getSenderVectorClock();
 	
 }

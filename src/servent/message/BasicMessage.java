@@ -2,10 +2,12 @@ package servent.message;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import app.AppConfig;
+import app.CausalBroadcastShared;
 import app.ServentInfo;
 
 /**
@@ -23,6 +25,7 @@ public class BasicMessage implements Message {
 	private final ServentInfo receiverInfo;
 	private final List<ServentInfo> routeList;
 	private final String messageText;
+	private final Map<Integer, Integer> senderVectorClock;
 
 	//This gives us a unique id - incremented in every natural constructor.
 	private static AtomicInteger messageCounter = new AtomicInteger(0);
@@ -34,7 +37,7 @@ public class BasicMessage implements Message {
 		this.receiverInfo = receiverInfo;
 		this.routeList = new ArrayList<>();
 		this.messageText = "";
-		
+		this.senderVectorClock = CausalBroadcastShared.getVectorClock();
 		this.messageId = messageCounter.getAndIncrement();
 	}
 	
@@ -45,7 +48,7 @@ public class BasicMessage implements Message {
 		this.receiverInfo = receiverInfo;
 		this.routeList = new ArrayList<>();
 		this.messageText = messageText;
-		
+		this.senderVectorClock = CausalBroadcastShared.getVectorClock();
 		this.messageId = messageCounter.getAndIncrement();
 	}
 	
@@ -81,13 +84,13 @@ public class BasicMessage implements Message {
 	}
 	
 	protected BasicMessage(MessageType type, ServentInfo originalSenderInfo, ServentInfo receiverInfo,
-			 List<ServentInfo> routeList, String messageText, int messageId) {
+			 List<ServentInfo> routeList, String messageText, int messageId,Map<Integer, Integer> senderVectorClock ) {
 		this.type = type;
 		this.originalSenderInfo = originalSenderInfo;
 		this.receiverInfo = receiverInfo;
 		this.routeList = routeList;
 		this.messageText = messageText;
-		
+		this.senderVectorClock = senderVectorClock;
 		this.messageId = messageId;
 	}
 	
@@ -103,7 +106,7 @@ public class BasicMessage implements Message {
 		List<ServentInfo> newRouteList = new ArrayList<>(routeList);
 		newRouteList.add(newRouteItem);
 		Message toReturn = new BasicMessage(getMessageType(), getOriginalSenderInfo(),
-				getReceiverInfo(), newRouteList, getMessageText(), getMessageId());
+				getReceiverInfo(), newRouteList, getMessageText(), getMessageId(),getSenderVectorClock());
 		
 		return toReturn;
 	}
@@ -118,7 +121,7 @@ public class BasicMessage implements Message {
 			ServentInfo newReceiverInfo = AppConfig.getInfoById(newReceiverId);
 			
 			Message toReturn = new BasicMessage(getMessageType(), getOriginalSenderInfo(),
-					newReceiverInfo,  getRoute(), getMessageText(), getMessageId());
+					newReceiverInfo,  getRoute(), getMessageText(), getMessageId(),getSenderVectorClock());
 			
 			return toReturn;
 		} else {
@@ -173,5 +176,10 @@ public class BasicMessage implements Message {
 	@Override
 	public void sendEffect() {
 		
+	}
+
+	@Override
+	public Map<Integer, Integer> getSenderVectorClock() {
+		return senderVectorClock;
 	}
 }

@@ -1,6 +1,7 @@
 package cli.command;
 
 import app.AppConfig;
+import app.CausalBroadcastShared;
 import app.ServentInfo;
 import app.snapshot_bitcake.BitcakeManager;
 import servent.message.Message;
@@ -10,7 +11,7 @@ import servent.message.util.MessageUtil;
 public class TransactionBurstCommand implements CLICommand {
 
 	private static final int TRANSACTION_COUNT = 5;
-	private static final int BURST_WORKERS = 10;
+	private static final int BURST_WORKERS = 5;
 	private static final int MAX_TRANSFER_AMOUNT = 10;
 	
 	//Chandy-Lamport
@@ -39,10 +40,14 @@ public class TransactionBurstCommand implements CLICommand {
 					 * The sending might be delayed, so we want to make sure we do the
 					 * reducing at the right time, not earlier.
 					 */
-//					Message transactionMessage = new TransactionMessage(
-//							AppConfig.myServentInfo, neighborInfo, amount, bitcakeManager);
-//
-//					MessageUtil.sendMessage(transactionMessage);
+					synchronized (CausalBroadcastShared.pendingMessagesLock){
+						Message transactionMessage = new TransactionMessage(
+								AppConfig.myServentInfo, neighborInfo, amount, bitcakeManager);
+
+						MessageUtil.sendMessage(transactionMessage);
+						CausalBroadcastShared.incrementClock(AppConfig.myServentInfo.getId());
+					}
+
 				}
 				
 			}

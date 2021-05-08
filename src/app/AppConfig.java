@@ -134,6 +134,9 @@ public class AppConfig {
 		case "ly":
 			SNAPSHOT_TYPE = SnapshotType.LAI_YANG;
 			break;
+		case "ab":
+			SNAPSHOT_TYPE = SnapshotType.ACHARYA_BADRINATH;
+			break;
 		default:
 			timestampedErrorPrint("Problem reading snapshot algorithm. Defaulting to NONE.");
 			SNAPSHOT_TYPE = SnapshotType.NONE;
@@ -180,6 +183,7 @@ public class AppConfig {
 			
 			ServentInfo newInfo = new ServentInfo("localhost", i, serventPort, neighborList);
 			serventInfoList.add(newInfo);
+			CausalBroadcastShared.initializeVectorClock(serventCount);
 		}
 	}
 	
