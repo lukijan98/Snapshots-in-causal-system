@@ -40,9 +40,9 @@ public class CLIParser implements Runnable, Cancellable {
 		this.commandList = new ArrayList<>();
 		
 		commandList.add(new InfoCommand());
+		commandList.add(new PrintVectorClockCommand());
 		commandList.add(new PauseCommand());
 		commandList.add(new PingCommand());
-		commandList.add(new PrintCausalCommand());
 		commandList.add(new TransactionBurstCommand(snapshotCollector.getBitcakeManager()));
 		commandList.add(new BitcakeInfoCommand(snapshotCollector));
 		commandList.add(new StopCommand(this, listener, senderThreads, snapshotCollector));

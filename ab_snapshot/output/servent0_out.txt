@@ -1,4 +1,13 @@
-14:50:46 - Starting servent [0|localhost|1100]
-14:50:46 - Pausing for 1000 ms
-14:50:47 - Pausing for 20000 ms
-14:51:07 - Stopping...
+19:39:56 - Starting servent [0|localhost|1100]
+19:39:57 - Pausing for 1000 ms
+19:39:58 - Pausing for 45000 ms
+19:40:43 - 152
+19:40:43 - 202
+19:40:43 - 202
+19:40:43 - 2
+19:40:43 - 102
+19:40:43 - 152
+19:40:43 - 202
+19:40:43 - Reaming messages: true
+19:40:43 - Pausing for 2000 ms
+19:40:45 - Stopping...

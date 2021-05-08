@@ -2,18 +2,10 @@ package servent.handler;
 
 import app.AppConfig;
 import app.CausalBroadcastShared;
-import app.ServentInfo;
 import app.snapshot_bitcake.AcharyaBadrinathBitcakeManager;
 import app.snapshot_bitcake.BitcakeManager;
-import app.snapshot_bitcake.LaiYangBitcakeManager;
 import servent.message.Message;
 import servent.message.MessageType;
-import servent.message.snapshot.ABTellMessage;
-import servent.message.util.MessageUtil;
-
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class TransactionHandler implements MessageHandler {
 
@@ -37,11 +29,13 @@ public class TransactionHandler implements MessageHandler {
 				AppConfig.timestampedErrorPrint("Couldn't parse amount: " + amountString);
 				return;
 			}
-			bitcakeManager.addSomeBitcakes(amountNumber);
-			if (bitcakeManager instanceof AcharyaBadrinathBitcakeManager) {
-				AcharyaBadrinathBitcakeManager abBitcakeManager = (AcharyaBadrinathBitcakeManager)bitcakeManager;
+			synchronized (CausalBroadcastShared.gatheringChannel) {
+				bitcakeManager.addSomeBitcakes(amountNumber);
+				if (bitcakeManager instanceof AcharyaBadrinathBitcakeManager) {
+					AcharyaBadrinathBitcakeManager abBitcakeManager = (AcharyaBadrinathBitcakeManager) bitcakeManager;
 
-				abBitcakeManager.recordGetTransaction(clientMessage.getOriginalSenderInfo().getId(), amountNumber);
+					abBitcakeManager.recordGetTransaction(clientMessage.getOriginalSenderInfo().getId(), amountNumber);
+				}
 			}
 
 

@@ -14,19 +14,13 @@ import java.util.function.BiFunction;
 
 public class AcharyaBadrinathBitcakeManager implements BitcakeManager {
 
-    private final AtomicInteger currentAmount = new AtomicInteger(10000);
+    private final AtomicInteger currentAmount = new AtomicInteger(1000);
 
-    public void takeSomeBitcakes(int amount) {
-        currentAmount.getAndAdd(-amount);
-    }
+    public void takeSomeBitcakes(int amount) { currentAmount.getAndAdd(-amount);}
 
-    public void addSomeBitcakes(int amount) {
-        currentAmount.getAndAdd(amount);
-    }
+    public void addSomeBitcakes(int amount) { currentAmount.getAndAdd(amount);}
 
-    public int getCurrentBitcakeAmount() {
-        return currentAmount.get();
-    }
+    public int getCurrentBitcakeAmount() { return currentAmount.get();}
 
     private Map<Integer, Integer> giveHistory = new ConcurrentHashMap<>();
     private Map<Integer, Integer> getHistory = new ConcurrentHashMap<>();
@@ -42,9 +36,10 @@ public class AcharyaBadrinathBitcakeManager implements BitcakeManager {
 
         int myId = AppConfig.myServentInfo.getId();
         Message tellMessage = null;
-        //synchronized (CausalBroadcastShared.pendingMessagesLock){
+        synchronized (CausalBroadcastShared.gatheringChannel){
         ABSnapshotResult snapshotResult = new ABSnapshotResult(myId, getCurrentBitcakeAmount(), giveHistory, getHistory);
         tellMessage = new ABTellMessage(AppConfig.myServentInfo,null,snapshotResult,tokenSenderId);
+        }
         for (Integer neighbor : AppConfig.myServentInfo.getNeighbors()) {
             tellMessage = tellMessage.changeReceiver(neighbor);
             MessageUtil.sendMessage(tellMessage);
@@ -54,20 +49,22 @@ public class AcharyaBadrinathBitcakeManager implements BitcakeManager {
                 e.printStackTrace();
             }
         }
+        CausalBroadcastShared.incrementClock(AppConfig.myServentInfo.getId());
     }
-
 
     public void sendToken(SnapshotCollector snapshotCollector) {
 
         int myId = AppConfig.myServentInfo.getId();
-        ABSnapshotResult snapshotResult = new ABSnapshotResult(
-                myId, getCurrentBitcakeAmount(), giveHistory, getHistory);
-
         Message tokenMessage=null;
-        //synchronized (CausalBroadcastShared.pendingMessagesLock){
-        tokenMessage = new TokenMessage(
-                AppConfig.myServentInfo, null);
+        ABSnapshotResult snapshotResult = null;
+        synchronized (CausalBroadcastShared.gatheringChannel) {
+            snapshotResult = new ABSnapshotResult(
+                    myId, getCurrentBitcakeAmount(), giveHistory, getHistory);
 
+
+            tokenMessage = new TokenMessage(
+                    AppConfig.myServentInfo, null);
+        }
 
         for (Integer neighbor : AppConfig.myServentInfo.getNeighbors()) {
             tokenMessage = tokenMessage.changeReceiver(neighbor);
@@ -81,7 +78,6 @@ public class AcharyaBadrinathBitcakeManager implements BitcakeManager {
         }
 
         Message toMe = null;
-        //synchronized (CausalBroadcastShared.pendingMessagesLock){
         toMe = new ABTellMessage(AppConfig.myServentInfo,AppConfig.myServentInfo,snapshotResult,myId);
         CausalBroadcastShared.addPendingMessage(toMe);
         CausalBroadcastShared.checkPendingMessages(snapshotCollector);
@@ -104,10 +100,14 @@ public class AcharyaBadrinathBitcakeManager implements BitcakeManager {
     }
 
     public void recordGiveTransaction(int neighbor, int amount) {
-        giveHistory.compute(neighbor, new AcharyaBadrinathBitcakeManager.MapValueUpdater(amount));
+       // synchronized (CausalBroadcastShared.gatheringChannel) {
+            giveHistory.compute(neighbor, new AcharyaBadrinathBitcakeManager.MapValueUpdater(amount));
+      //  }
     }
 
     public void recordGetTransaction(int neighbor, int amount) {
-        getHistory.compute(neighbor, new AcharyaBadrinathBitcakeManager.MapValueUpdater(amount));
+      //  synchronized (CausalBroadcastShared.gatheringChannel) {
+            getHistory.compute(neighbor, new AcharyaBadrinathBitcakeManager.MapValueUpdater(amount));
+       // }
     }
 }

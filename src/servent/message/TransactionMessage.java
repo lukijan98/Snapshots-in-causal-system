@@ -1,12 +1,10 @@
 package servent.message;
 
 import app.AppConfig;
+import app.CausalBroadcastShared;
 import app.ServentInfo;
-import app.snapshot_bitcake.ABSnapshotResult;
 import app.snapshot_bitcake.AcharyaBadrinathBitcakeManager;
 import app.snapshot_bitcake.BitcakeManager;
-import app.snapshot_bitcake.LaiYangBitcakeManager;
-import servent.message.snapshot.ABTellMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,15 +75,17 @@ public class TransactionMessage extends BasicMessage {
 	public void sendEffect() {
 		if(bitcakeManager!=null) {
 			int amount = Integer.parseInt(getMessageText());
-			try {
-				bitcakeManager.takeSomeBitcakes(amount);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+
+			synchronized (CausalBroadcastShared.gatheringChannel){
+			bitcakeManager.takeSomeBitcakes(amount);
+
+			CausalBroadcastShared.incrementClock(AppConfig.myServentInfo.getId());
+
 			if (bitcakeManager instanceof AcharyaBadrinathBitcakeManager) {
 				AcharyaBadrinathBitcakeManager abFinancialManager = (AcharyaBadrinathBitcakeManager) bitcakeManager;
 
 				abFinancialManager.recordGiveTransaction(getReceiverInfo().getId(), amount);
+			}
 			}
 		}
 

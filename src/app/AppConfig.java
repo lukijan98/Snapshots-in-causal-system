@@ -124,16 +124,8 @@ public class AppConfig {
 		if (snapshotType == null) {
 			snapshotType = "none";
 		}
+		CausalBroadcastShared.initializeVectorClock(serventCount);
 		switch (snapshotType) {
-		case "naive":
-			SNAPSHOT_TYPE = SnapshotType.NAIVE;
-			break;
-		case "cl":
-			SNAPSHOT_TYPE = SnapshotType.CHANDY_LAMPORT;
-			break;
-		case "ly":
-			SNAPSHOT_TYPE = SnapshotType.LAI_YANG;
-			break;
 		case "ab":
 			SNAPSHOT_TYPE = SnapshotType.ACHARYA_BADRINATH;
 			break;
@@ -183,7 +175,7 @@ public class AppConfig {
 			
 			ServentInfo newInfo = new ServentInfo("localhost", i, serventPort, neighborList);
 			serventInfoList.add(newInfo);
-			CausalBroadcastShared.initializeVectorClock(serventCount);
+
 		}
 	}
 	

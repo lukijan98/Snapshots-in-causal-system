@@ -32,8 +32,8 @@ public class CausalBroadcastShared {
     private static Map<Integer, Integer> vectorClock = new ConcurrentHashMap<>();
     private static List<Message> commitedCausalMessageList = new CopyOnWriteArrayList<>();
     private static Queue<Message> pendingMessages = new ConcurrentLinkedQueue<>();
-    public static Object pendingMessagesLock = new Object();
-    private static Object sendingMessageLock = new Object();
+    private static Object pendingMessagesLock = new Object();
+    public static Object gatheringChannel = new Object();
     private static ExecutorService commitedMessagesPoll = Executors.newCachedThreadPool();
 
     public static void initializeVectorClock(int serventCount) {
@@ -41,6 +41,8 @@ public class CausalBroadcastShared {
             vectorClock.put(i, 0);
         }
     }
+
+    public static boolean isEmptyPending(){return pendingMessages.isEmpty();}
 
     public static void incrementClock(int serventId) {
         vectorClock.computeIfPresent(serventId, new BiFunction<Integer, Integer, Integer>() {
@@ -105,7 +107,7 @@ public class CausalBroadcastShared {
 //                        int value2 = pendingMessage.getSenderVectorClock().get(key);
 //                        AppConfig.timestampedStandardPrint(value1+" - "+value2);
 //                    }
-                   // AppConfig.timestampedStandardPrint("\n");
+                    //AppConfig.timestampedStandardPrint("\n");
                     if (!otherClockGreater(myVectorClock, pendingMessage.getSenderVectorClock())) {
                         gotWork = true;
 

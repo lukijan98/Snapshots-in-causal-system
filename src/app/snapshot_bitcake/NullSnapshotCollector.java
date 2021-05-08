@@ -19,19 +19,16 @@ public class NullSnapshotCollector implements SnapshotCollector {
 		return null;
 	}
 
-	@Override
-	public void addNaiveSnapshotInfo(String snapshotSubject, int amount) {}
-
-	@Override
-	public void addCLSnapshotInfo(int id, CLSnapshotResult clSnapshotResult) {}
-
-	@Override
-	public void addLYSnapshotInfo(int id, LYSnapshotResult lySnapshotResult) {}
 
 	@Override
 	public void addABSnapshotInfo(int id, ABSnapshotResult abSnapshotResult) {}
 
 	@Override
 	public void startCollecting() {}
+
+	@Override
+	public boolean isCollecting() {
+		return false;
+	}
 
 }

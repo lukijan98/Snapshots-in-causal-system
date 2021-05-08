@@ -11,8 +11,8 @@ import servent.message.util.MessageUtil;
 public class TransactionBurstCommand implements CLICommand {
 
 	private static final int TRANSACTION_COUNT = 5;
-	private static final int BURST_WORKERS = 5;
-	private static final int MAX_TRANSFER_AMOUNT = 50;
+	private static final int BURST_WORKERS = 10;
+	private static final int MAX_TRANSFER_AMOUNT = 10;
 	
 	//Chandy-Lamport
 //	private static final int TRANSACTION_COUNT = 3;
@@ -46,7 +46,8 @@ public class TransactionBurstCommand implements CLICommand {
 								AppConfig.myServentInfo, neighborInfo, amount, bitcakeManager);
 
 						MessageUtil.sendMessage(transactionMessage);
-						CausalBroadcastShared.incrementClock(AppConfig.myServentInfo.getId());
+
+						//CausalBroadcastShared.incrementClock(AppConfig.myServentInfo.getId());
 				}
 				
 			}
