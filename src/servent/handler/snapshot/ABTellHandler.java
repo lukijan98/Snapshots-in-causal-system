@@ -23,14 +23,18 @@ public class ABTellHandler implements MessageHandler {
 
     @Override
     public void run() {
-        if (clientMessage.getMessageType() == MessageType.AB_TELL) {
-            ABTellMessage abTellMessage = (ABTellMessage)clientMessage;
-
-            snapshotCollector.addABSnapshotInfo(
-                    abTellMessage.getOriginalSenderInfo().getId(),
-                    abTellMessage.getABSnapshotResult());
-        } else {
-            AppConfig.timestampedErrorPrint("Tell amount handler got: " + clientMessage);
+        try {
+            if (clientMessage.getMessageType() == MessageType.AB_TELL) {
+                ABTellMessage abTellMessage = (ABTellMessage) clientMessage;
+                snapshotCollector.addABSnapshotInfo(
+                        abTellMessage.getOriginalSenderInfo().getId(),
+                        abTellMessage.getABSnapshotResult());
+            } else {
+                AppConfig.timestampedErrorPrint("Tell amount handler got: " + clientMessage);
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
         }
 
     }

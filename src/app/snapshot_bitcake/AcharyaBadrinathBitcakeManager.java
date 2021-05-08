@@ -3,7 +3,6 @@ package app.snapshot_bitcake;
 import app.AppConfig;
 import app.CausalBroadcastShared;
 import servent.message.Message;
-import servent.message.MessageType;
 import servent.message.snapshot.ABTellMessage;
 import servent.message.snapshot.TokenMessage;
 import servent.message.util.MessageUtil;
@@ -15,7 +14,7 @@ import java.util.function.BiFunction;
 
 public class AcharyaBadrinathBitcakeManager implements BitcakeManager {
 
-    private final AtomicInteger currentAmount = new AtomicInteger(1000);
+    private final AtomicInteger currentAmount = new AtomicInteger(10000);
 
     public void takeSomeBitcakes(int amount) {
         currentAmount.getAndAdd(-amount);
@@ -42,8 +41,10 @@ public class AcharyaBadrinathBitcakeManager implements BitcakeManager {
     public void sendTell(int tokenSenderId) {
 
         int myId = AppConfig.myServentInfo.getId();
+        Message tellMessage = null;
+        //synchronized (CausalBroadcastShared.pendingMessagesLock){
         ABSnapshotResult snapshotResult = new ABSnapshotResult(myId, getCurrentBitcakeAmount(), giveHistory, getHistory);
-        Message tellMessage = new ABTellMessage(AppConfig.myServentInfo,null,snapshotResult,tokenSenderId);
+        tellMessage = new ABTellMessage(AppConfig.myServentInfo,null,snapshotResult,tokenSenderId);
         for (Integer neighbor : AppConfig.myServentInfo.getNeighbors()) {
             tellMessage = tellMessage.changeReceiver(neighbor);
             MessageUtil.sendMessage(tellMessage);
@@ -62,12 +63,15 @@ public class AcharyaBadrinathBitcakeManager implements BitcakeManager {
         ABSnapshotResult snapshotResult = new ABSnapshotResult(
                 myId, getCurrentBitcakeAmount(), giveHistory, getHistory);
 
-        Message tokenMessage = new TokenMessage(
+        Message tokenMessage=null;
+        //synchronized (CausalBroadcastShared.pendingMessagesLock){
+        tokenMessage = new TokenMessage(
                 AppConfig.myServentInfo, null);
 
 
         for (Integer neighbor : AppConfig.myServentInfo.getNeighbors()) {
             tokenMessage = tokenMessage.changeReceiver(neighbor);
+
             MessageUtil.sendMessage(tokenMessage);
             try {
                 Thread.sleep(100);
@@ -76,9 +80,12 @@ public class AcharyaBadrinathBitcakeManager implements BitcakeManager {
             }
         }
 
-        Message toMe = new ABTellMessage(AppConfig.myServentInfo,AppConfig.myServentInfo,snapshotResult,myId);
+        Message toMe = null;
+        //synchronized (CausalBroadcastShared.pendingMessagesLock){
+        toMe = new ABTellMessage(AppConfig.myServentInfo,AppConfig.myServentInfo,snapshotResult,myId);
         CausalBroadcastShared.addPendingMessage(toMe);
         CausalBroadcastShared.checkPendingMessages(snapshotCollector);
+
 
     }
 

@@ -75,19 +75,18 @@ public class TransactionMessage extends BasicMessage {
 	 */
 	@Override
 	public void sendEffect() {
-		int amount = Integer.parseInt(getMessageText());
-		if(bitcakeManager==null)
-			AppConfig.timestampedStandardPrint("AUUUUUUUUUUUU");
-		//AppConfig.timestampedStandardPrint("Prenos: "+ amount);
-		try{
-		bitcakeManager.takeSomeBitcakes(amount);}
-		catch (Exception e){
-			e.printStackTrace();
-		}
-		if (bitcakeManager instanceof AcharyaBadrinathBitcakeManager) {
-			AcharyaBadrinathBitcakeManager abFinancialManager = (AcharyaBadrinathBitcakeManager) bitcakeManager;
+		if(bitcakeManager!=null) {
+			int amount = Integer.parseInt(getMessageText());
+			try {
+				bitcakeManager.takeSomeBitcakes(amount);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if (bitcakeManager instanceof AcharyaBadrinathBitcakeManager) {
+				AcharyaBadrinathBitcakeManager abFinancialManager = (AcharyaBadrinathBitcakeManager) bitcakeManager;
 
-			abFinancialManager.recordGiveTransaction(getReceiverInfo().getId(), amount);
+				abFinancialManager.recordGiveTransaction(getReceiverInfo().getId(), amount);
+			}
 		}
 
 	}

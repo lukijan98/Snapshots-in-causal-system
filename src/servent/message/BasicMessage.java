@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import app.AppConfig;
@@ -37,7 +38,8 @@ public class BasicMessage implements Message {
 		this.receiverInfo = receiverInfo;
 		this.routeList = new ArrayList<>();
 		this.messageText = "";
-		this.senderVectorClock = CausalBroadcastShared.getVectorClock();
+		this.senderVectorClock = new ConcurrentHashMap<>(
+		CausalBroadcastShared.getVectorClock());
 		this.messageId = messageCounter.getAndIncrement();
 	}
 	
@@ -48,7 +50,8 @@ public class BasicMessage implements Message {
 		this.receiverInfo = receiverInfo;
 		this.routeList = new ArrayList<>();
 		this.messageText = messageText;
-		this.senderVectorClock = CausalBroadcastShared.getVectorClock();
+		this.senderVectorClock = new ConcurrentHashMap<>(
+				CausalBroadcastShared.getVectorClock());
 		this.messageId = messageCounter.getAndIncrement();
 	}
 	

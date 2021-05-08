@@ -1,4 +1,30 @@
-03:38:22 - Starting servent [4|localhost|1500]
-03:38:22 - Pausing for 500 ms
-03:38:23 - Pausing for 20000 ms
-03:38:43 - Stopping...
+14:50:45 - Starting servent [4|localhost|1500]
+14:50:46 - Pausing for 500 ms
+14:50:46 - Pausing for 20000 ms
+14:50:56 - Recorded bitcake amount for 0 = 9157
+14:50:56 - Recorded bitcake amount for 1 = 7691
+14:50:56 - Recorded bitcake amount for 2 = 7698
+14:50:56 - Recorded bitcake amount for 3 = 10000
+14:50:56 - Recorded bitcake amount for 4 = 10000
+14:50:56 - Recorded bitcake amount for 5 = 9437
+14:50:56 - Recorded bitcake amount for 6 = 7615
+14:50:56 - Unreceived bitcake amount: 620 from servent 0 to servent 1
+14:50:56 - Unreceived bitcake amount: 650 from servent 0 to servent 2
+14:50:56 - Unreceived bitcake amount: 655 from servent 0 to servent 6
+14:50:56 - Unreceived bitcake amount: 105 from servent 1 to servent 0
+14:50:56 - Unreceived bitcake amount: 554 from servent 1 to servent 2
+14:50:56 - Unreceived bitcake amount: 634 from servent 1 to servent 3
+14:50:56 - Unreceived bitcake amount: 663 from servent 1 to servent 5
+14:50:56 - Unreceived bitcake amount: 107 from servent 2 to servent 0
+14:50:56 - Unreceived bitcake amount: 472 from servent 2 to servent 1
+14:50:56 - Unreceived bitcake amount: 612 from servent 2 to servent 3
+14:50:56 - Unreceived bitcake amount: 579 from servent 2 to servent 6
+14:50:56 - Unreceived bitcake amount: -1 from servent 5 to servent 1
+14:50:56 - Unreceived bitcake amount: 269 from servent 5 to servent 4
+14:50:56 - Unreceived bitcake amount: 172 from servent 5 to servent 6
+14:50:56 - Unreceived bitcake amount: 441 from servent 6 to servent 0
+14:50:56 - Unreceived bitcake amount: 729 from servent 6 to servent 2
+14:50:56 - Unreceived bitcake amount: 393 from servent 6 to servent 3
+14:50:56 - Unreceived bitcake amount: 748 from servent 6 to servent 5
+14:50:56 - System bitcake count: 70000
+14:51:06 - Stopping...

@@ -22,7 +22,6 @@ public class TokenHandler implements MessageHandler {
         try{
             if(bitcakeManager instanceof AcharyaBadrinathBitcakeManager)
                 ((AcharyaBadrinathBitcakeManager)bitcakeManager).sendTell(clientMessage.getOriginalSenderInfo().getId());
-            AppConfig.timestampedStandardPrint("Got token");
         }
         catch (Exception e)
         {

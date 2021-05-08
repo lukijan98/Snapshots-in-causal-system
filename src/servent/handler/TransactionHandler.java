@@ -44,6 +44,7 @@ public class TransactionHandler implements MessageHandler {
 				abBitcakeManager.recordGetTransaction(clientMessage.getOriginalSenderInfo().getId(), amountNumber);
 			}
 
+
 		} else {
 			AppConfig.timestampedErrorPrint("Transaction handler got: " + clientMessage);
 		}

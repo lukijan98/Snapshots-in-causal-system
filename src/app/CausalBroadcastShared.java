@@ -95,12 +95,20 @@ public class CausalBroadcastShared {
 
             synchronized (pendingMessagesLock) {
                 Iterator<Message> iterator = pendingMessages.iterator();
-
                 Map<Integer, Integer> myVectorClock = getVectorClock();
                 while (iterator.hasNext()) {
                     Message pendingMessage = iterator.next();
+                    //AppConfig.timestampedStandardPrint(myVectorClock);
+//                    for (Map.Entry<Integer, Integer> entry1 : myVectorClock.entrySet()) {
+//                        int key = entry1.getKey();
+//                        int value1 = entry1.getValue();
+//                        int value2 = pendingMessage.getSenderVectorClock().get(key);
+//                        AppConfig.timestampedStandardPrint(value1+" - "+value2);
+//                    }
+                   // AppConfig.timestampedStandardPrint("\n");
                     if (!otherClockGreater(myVectorClock, pendingMessage.getSenderVectorClock())) {
                         gotWork = true;
+
                         switch (pendingMessage.getMessageType()) {
                             case TOKEN:
                                 incrementClock(pendingMessage.getOriginalSenderInfo().getId());
@@ -110,14 +118,14 @@ public class CausalBroadcastShared {
                                 if(((ABTellMessage)pendingMessage).getInitiatorID()==AppConfig.myServentInfo.getId())
                                     commitedMessagesPoll.submit(new ABTellHandler(pendingMessage,snapshotCollector));
                                 incrementClock(pendingMessage.getOriginalSenderInfo().getId());
+                                break;
                             case TRANSACTION:
                                 if(((TransactionMessage)pendingMessage).getIntendedReciver()==AppConfig.myServentInfo.getId())
                                     commitedMessagesPoll.submit(new TransactionHandler(pendingMessage,snapshotCollector.getBitcakeManager()));
                                 incrementClock(pendingMessage.getOriginalSenderInfo().getId());
+                                break;
                         }
 
-
-                        //AppConfig.timestampedStandardPrint("Committing " + pendingMessage);
                         commitedCausalMessageList.add(pendingMessage);
 
                         iterator.remove();
