@@ -3,6 +3,7 @@ package servent.handler;
 import app.AppConfig;
 import app.CausalBroadcastShared;
 import app.snapshot_bitcake.AcharyaBadrinathBitcakeManager;
+import app.snapshot_bitcake.AlagarVenkatesanBitcakeManager;
 import app.snapshot_bitcake.BitcakeManager;
 import servent.message.Message;
 import servent.message.MessageType;
@@ -35,6 +36,11 @@ public class TransactionHandler implements MessageHandler {
 					AcharyaBadrinathBitcakeManager abBitcakeManager = (AcharyaBadrinathBitcakeManager) bitcakeManager;
 
 					abBitcakeManager.recordGetTransaction(clientMessage.getOriginalSenderInfo().getId(), amountNumber);
+				}
+				if (bitcakeManager instanceof AlagarVenkatesanBitcakeManager) {
+					AlagarVenkatesanBitcakeManager avBitcakeManager = (AlagarVenkatesanBitcakeManager) bitcakeManager;
+
+					avBitcakeManager.recordGetTransaction(clientMessage.getSenderVectorClock(),clientMessage.getOriginalSenderInfo().getId(), amountNumber);
 				}
 			}
 

@@ -23,7 +23,7 @@ public class PrintVectorClockCommand implements CLICommand {
         for (Map.Entry<Integer, Integer> entry1 : vectorclock.entrySet()) {
             AppConfig.timestampedStandardPrint(String.valueOf(entry1.getValue()));
         }
-       AppConfig.timestampedStandardPrint("Reaming messages: "+ CausalBroadcastShared.isEmptyPending());
+       AppConfig.timestampedStandardPrint("Pending messages are empty: "+ CausalBroadcastShared.isEmptyPending());
 
     }
 

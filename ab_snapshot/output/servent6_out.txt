@@ -1,13 +1,13 @@
-19:39:56 - Starting servent [6|localhost|1700]
-19:39:56 - Pausing for 2000 ms
-19:39:59 - Pausing for 40000 ms
-19:40:39 - 152
-19:40:39 - 202
-19:40:39 - 202
-19:40:39 - 2
-19:40:39 - 102
-19:40:39 - 152
-19:40:39 - 202
-19:40:39 - Reaming messages: true
-19:40:39 - Pausing for 2000 ms
-19:40:41 - Stopping...
+18:48:07 - Starting servent [6|localhost|1700]
+18:48:07 - Pausing for 2000 ms
+18:48:11 - Pausing for 40000 ms
+18:48:51 - 152
+18:48:51 - 202
+18:48:51 - 202
+18:48:51 - 2
+18:48:51 - 102
+18:48:51 - 152
+18:48:51 - 202
+18:48:51 - Pending messages are empty: true
+18:48:51 - Pausing for 2000 ms
+18:48:53 - Stopping...

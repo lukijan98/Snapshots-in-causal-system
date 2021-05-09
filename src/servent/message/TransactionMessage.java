@@ -4,6 +4,7 @@ import app.AppConfig;
 import app.CausalBroadcastShared;
 import app.ServentInfo;
 import app.snapshot_bitcake.AcharyaBadrinathBitcakeManager;
+import app.snapshot_bitcake.AlagarVenkatesanBitcakeManager;
 import app.snapshot_bitcake.BitcakeManager;
 
 import java.util.ArrayList;
@@ -86,6 +87,11 @@ public class TransactionMessage extends BasicMessage {
 
 				abFinancialManager.recordGiveTransaction(getReceiverInfo().getId(), amount);
 			}
+				if (bitcakeManager instanceof AlagarVenkatesanBitcakeManager) {
+					AlagarVenkatesanBitcakeManager avFinancialManager = (AlagarVenkatesanBitcakeManager) bitcakeManager;
+
+					avFinancialManager.recordGiveTransaction(getSenderVectorClock(),getReceiverInfo().getId(),amount);
+				}
 			}
 		}
 

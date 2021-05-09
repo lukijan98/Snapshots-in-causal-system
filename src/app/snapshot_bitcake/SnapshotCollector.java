@@ -14,6 +14,8 @@ public interface SnapshotCollector extends Runnable, Cancellable {
 
 
 	void addABSnapshotInfo(int id, ABSnapshotResult abSnapshotResult);
+	void addDoneMessage(int id);
+	void setTerminateNotArrived();
 	void startCollecting();
 	boolean isCollecting();
 

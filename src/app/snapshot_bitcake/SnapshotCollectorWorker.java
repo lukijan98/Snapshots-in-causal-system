@@ -1,14 +1,15 @@
 package app.snapshot_bitcake;
 
+
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import app.AppConfig;
-import servent.message.Message;
-import servent.message.util.MessageUtil;
+
+
 
 /**
  * Main snapshot collector class. Has support for Naive, Chandy-Lamport
@@ -20,10 +21,13 @@ import servent.message.util.MessageUtil;
 public class SnapshotCollectorWorker implements SnapshotCollector {
 
 	private volatile boolean working = true;
+
+	private volatile boolean terminateNotArrived = true;
 	
 	private AtomicBoolean collecting = new AtomicBoolean(false);
 
 	private Map<Integer, ABSnapshotResult> collectedABValues = new ConcurrentHashMap<>();
+	private List<Integer> collectedDoneMessages = new CopyOnWriteArrayList<>();
 
 	private SnapshotType snapshotType;
 	
@@ -35,6 +39,9 @@ public class SnapshotCollectorWorker implements SnapshotCollector {
 		switch(snapshotType) {
 		case ACHARYA_BADRINATH:
 			bitcakeManager = new AcharyaBadrinathBitcakeManager();
+			break;
+		case ALAGAR_VENKATESAN:
+			bitcakeManager = new AlagarVenkatesanBitcakeManager();
 			break;
 		case NONE:
 			AppConfig.timestampedErrorPrint("Making snapshot collector without specifying type. Exiting...");
@@ -77,8 +84,10 @@ public class SnapshotCollectorWorker implements SnapshotCollector {
 			//1 send asks
 			switch (snapshotType) {
 			case ACHARYA_BADRINATH:
-				AppConfig.timestampedStandardPrint("Usao");
 				((AcharyaBadrinathBitcakeManager)bitcakeManager).sendToken(this);
+				break;
+			case ALAGAR_VENKATESAN:
+				((AlagarVenkatesanBitcakeManager)bitcakeManager).sendToken();
 				break;
 			case NONE:
 				//Shouldn't be able to come here. See constructor. 
@@ -93,8 +102,12 @@ public class SnapshotCollectorWorker implements SnapshotCollector {
 					if (collectedABValues.size() == AppConfig.getServentCount()) {
 						waiting = false;
 					}
-					else
-						//AppConfig.timestampedStandardPrint(String.valueOf(collectedABValues.size()));
+					break;
+				case ALAGAR_VENKATESAN:
+					if (collectedDoneMessages.size() +1 == AppConfig.getServentCount()) {
+						waiting = false;
+						((AlagarVenkatesanBitcakeManager)bitcakeManager).sendTerminate(this);
+					}
 					break;
 				case NONE:
 					//Shouldn't be able to come here. See constructor. 
@@ -145,6 +158,16 @@ public class SnapshotCollectorWorker implements SnapshotCollector {
 
 				collectedABValues.clear(); //reset for next invocation
 				break;
+			case ALAGAR_VENKATESAN:
+				while(terminateNotArrived);
+				{
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				collectedDoneMessages.clear();
 			case NONE:
 				//Shouldn't be able to come here. See constructor. 
 				break;
@@ -158,6 +181,11 @@ public class SnapshotCollectorWorker implements SnapshotCollector {
 	@Override
 	public void addABSnapshotInfo(int id, ABSnapshotResult abSnapshotResult) {
 		collectedABValues.put(id, abSnapshotResult);
+	}
+
+	@Override
+	public void addDoneMessage(int id) {
+		collectedDoneMessages.add(id);
 	}
 
 	@Override
@@ -177,6 +205,10 @@ public class SnapshotCollectorWorker implements SnapshotCollector {
 	@Override
 	public void stop() {
 		working = false;
+	}
+
+	public void setTerminateNotArrived(){
+		terminateNotArrived = false;
 	}
 
 }

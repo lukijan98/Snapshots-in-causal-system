@@ -24,6 +24,16 @@ public class NullSnapshotCollector implements SnapshotCollector {
 	public void addABSnapshotInfo(int id, ABSnapshotResult abSnapshotResult) {}
 
 	@Override
+	public void addDoneMessage(int id) {
+
+	}
+
+	@Override
+	public void setTerminateNotArrived() {
+
+	}
+
+	@Override
 	public void startCollecting() {}
 
 	@Override

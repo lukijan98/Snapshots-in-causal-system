@@ -10,10 +10,14 @@ import java.util.function.BiFunction;
 import app.snapshot_bitcake.SnapshotCollector;
 import servent.handler.TransactionHandler;
 import servent.handler.snapshot.ABTellHandler;
+import servent.handler.snapshot.DoneHandler;
+import servent.handler.snapshot.TerminateHandler;
 import servent.handler.snapshot.TokenHandler;
 import servent.message.Message;
 import servent.message.TransactionMessage;
 import servent.message.snapshot.ABTellMessage;
+import servent.message.snapshot.DoneMessage;
+import servent.message.snapshot.TerminateMessage;
 
 /**
  * This class contains shared data for the Causal Broadcast implementation:
@@ -117,14 +121,23 @@ public class CausalBroadcastShared {
                                 commitedMessagesPoll.submit(new TokenHandler(pendingMessage,snapshotCollector.getBitcakeManager()));
                                 break;
                             case AB_TELL:
+                                incrementClock(pendingMessage.getOriginalSenderInfo().getId());
                                 if(((ABTellMessage)pendingMessage).getInitiatorID()==AppConfig.myServentInfo.getId())
                                     commitedMessagesPoll.submit(new ABTellHandler(pendingMessage,snapshotCollector));
-                                incrementClock(pendingMessage.getOriginalSenderInfo().getId());
                                 break;
                             case TRANSACTION:
+                                incrementClock(pendingMessage.getOriginalSenderInfo().getId());
                                 if(((TransactionMessage)pendingMessage).getIntendedReciver()==AppConfig.myServentInfo.getId())
                                     commitedMessagesPoll.submit(new TransactionHandler(pendingMessage,snapshotCollector.getBitcakeManager()));
+                                break;
+                            case DONE:
                                 incrementClock(pendingMessage.getOriginalSenderInfo().getId());
+                                if(((DoneMessage)pendingMessage).getInitiatorID()==AppConfig.myServentInfo.getId())
+                                    commitedMessagesPoll.submit(new DoneHandler(pendingMessage,snapshotCollector));
+                                break;
+                            case TERMINATE:
+                                incrementClock(pendingMessage.getOriginalSenderInfo().getId());
+                                commitedMessagesPoll.submit(new TerminateHandler(pendingMessage,snapshotCollector));
                                 break;
                         }
 
